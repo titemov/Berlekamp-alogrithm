@@ -34,6 +34,7 @@ public class Main {
             //System.out.println(Arrays.toString(coeffs));
             System.out.println("Enter prime number (mod):");
             int mod = scanner.nextInt();
+            if(mod<2 || mod>(Math.pow(2,16)-1)) throw new Exception();
 
             Backend backend = new Backend();
             backend.setMod(mod);
