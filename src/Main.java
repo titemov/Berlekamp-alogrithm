@@ -18,6 +18,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         Log logger = new Log();
+        Backend a = new Backend();
         logger.initialEntry();
         try {
             System.out.println("Enter coefficients using \"space\" as separator (for example: \"1 0 4 1\"):");
@@ -34,7 +35,7 @@ public class Main {
             //System.out.println(Arrays.toString(coeffs));
             System.out.println("Enter prime number (mod):");
             int mod = scanner.nextInt();
-            if(mod<2 || mod>(Math.pow(2,16)-1)) throw new Exception();
+            if(mod<2 || mod > Math.pow(2,16)-1) throw new Exception();
 
             Backend backend = new Backend();
             backend.setMod(mod);

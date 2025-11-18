@@ -17,7 +17,7 @@ public class Backend {
         return lastDeg;
     }
 
-    private int modulo(int num, int mod){
+    public int modulo(int num, int mod){
         if(num>0){
             return (num+mod)%mod;
         }
@@ -48,6 +48,7 @@ public class Backend {
     }
 
     public void gaussJordanElimination(List<List<Integer>> matrix){
+        Log logger = new Log();
         int n=matrix.size();
         int m=matrix.get(0).size();
 
@@ -63,6 +64,8 @@ public class Backend {
                     }
                 }
             }
+            logger.writeLog("After first step\n",true);
+            printMatrix(matrix);
             if(matrix.get(i).get(i)==0) continue;
 
             //normalizing leading elem to 1
@@ -70,6 +73,10 @@ public class Backend {
             for(int j=0;j<m;j++){
                 matrix.get(i).set(j,modulo(matrix.get(i).get(j)*inv,this.mod));
             }
+
+            logger.writeLog("After 2nd step",true);
+            System.out.println(3);
+            printMatrix(matrix);
 
             for(int k=0;k<n;k++){
                 if(k!=i && matrix.get(k).get(i)!=0){
@@ -79,6 +86,9 @@ public class Backend {
                     }
                 }
             }
+            logger.writeLog("After 3rd step",true);
+            System.out.println(4);
+            printMatrix(matrix);
         }
     }
 
@@ -431,6 +441,10 @@ public class Backend {
 
         int k = n - rank;
         logger.writeLog("Amount of multipliers: "+k,true);
+        if(k<=1){
+            System.out.println("No soluion");
+            return;
+        }
 
         List<List<Integer>> FSRMatrix = solveFundamentalSystem(resultMatrix);
 
