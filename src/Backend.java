@@ -17,7 +17,7 @@ public class Backend {
         return lastDeg;
     }
 
-    public int modulo(int num, int mod){
+    private int modulo(int num, int mod){
         if(num>0){
             return (num+mod)%mod;
         }
@@ -48,12 +48,13 @@ public class Backend {
     }
 
     public void gaussJordanElimination(List<List<Integer>> matrix){
-        Log logger = new Log();
+        //приведение матрицы к ступенчатому виду
+
         int n=matrix.size();
         int m=matrix.get(0).size();
 
         for(int i=0; i<n; i++){
-            //Find leading elem
+            //находим ведущий элемент
             if(matrix.get(i).get(i)==0){
                 for(int k=i+1;k<n;k++){
                     if(matrix.get(k).get(i)!=0){
@@ -64,20 +65,15 @@ public class Backend {
                     }
                 }
             }
-            logger.writeLog("After first step\n",true);
-            printMatrix(matrix);
-            if(matrix.get(i).get(i)==0) continue;
+            if(matrix.get(i).get(i)==0) continue;//если ведущий элемент равен нулю - пропуск шага
 
-            //normalizing leading elem to 1
+            //нормализовать ведущий элемент до 1
             int inv = modInverse(matrix.get(i).get(i),this.mod);
             for(int j=0;j<m;j++){
                 matrix.get(i).set(j,modulo(matrix.get(i).get(j)*inv,this.mod));
             }
 
-            logger.writeLog("After 2nd step",true);
-            System.out.println(3);
-            printMatrix(matrix);
-
+            //обнулить элементы в текущем столбце над и под ведущим элементом
             for(int k=0;k<n;k++){
                 if(k!=i && matrix.get(k).get(i)!=0){
                     int factor = matrix.get(k).get(i);
@@ -86,13 +82,11 @@ public class Backend {
                     }
                 }
             }
-            logger.writeLog("After 3rd step",true);
-            System.out.println(4);
-            printMatrix(matrix);
         }
     }
 
     public List<List<Integer>> findBasisOfSolutionSpace(List<List<Integer>> matrix){
+        //функуция для нахождения базиса пространства решений однородной системы
         int n=matrix.size();
         int m=matrix.get(0).size();
         List<List<Integer>> basis = new ArrayList<>();
@@ -105,6 +99,7 @@ public class Backend {
             isFreeVariable.add(true);
         }
 
+        //определение свободных переменных
         for(int i=0;i<n;i++){
             int leadingEntry=-1;
             for(int j=0;j<m;j++){
@@ -118,6 +113,7 @@ public class Backend {
             }
         }
 
+        //формирование базиса пространства решений
         for(int j=0;j<m;j++){
             if(isFreeVariable.get(j)){
                 ArrayList<Integer> solution = new ArrayList<>();
@@ -144,11 +140,16 @@ public class Backend {
     }
 
     public List<List<Integer>> solveFundamentalSystem(List<List<Integer>> matrix){
+        //функция для решения фундаментальной системы решений
+
+        //применяем модуль ко всем элементам
         for(int i=0;i<matrix.size();i++){
             for(int j=0;j<matrix.get(i).size();j++){
                 matrix.get(i).set(j,modulo(matrix.get(i).get(j),this.mod));
             }
         }
+
+        //возвращаем базис пространства решений
         return findBasisOfSolutionSpace(matrix);
     }
 
@@ -205,10 +206,11 @@ public class Backend {
     }
 
     public List<List<Integer>> buildSylvesterMatrix(ArrayList<Integer> coeffs1, ArrayList<Integer> coeffs3, int c){
+        //функция строения матрицы сильвестра
         int n1 = getLastDeg(coeffs1);
         int n3 = getLastDeg(coeffs3);
 
-        int sizeMatrix=n1+n3;
+        int sizeMatrix=n1+n3;//размер матрицы
 
         List<List<Integer>> sylvesterMatrix = new ArrayList<>();
         for(int i=0;i<sizeMatrix;i++){
@@ -219,8 +221,9 @@ public class Backend {
             sylvesterMatrix.add(temp);
         }
 
-        int filledRows = 0;
+        int filledRows = 0;//Переменная для отслеживания количества заполненных строк
 
+        //Заполнение коэффициентами многочлена coeffs1
         for(int j=0;j<n3;++j){
             for(int i=0;i<=n1;++i) {
                 sylvesterMatrix.get(j).set((i+j),coeffs1.get(n1-i));
@@ -228,12 +231,14 @@ public class Backend {
             filledRows++;
         }
 
+        //Заполнение коэффициентами многочлена coeffs3
         for(int j=filledRows;j<sizeMatrix;j++){
             for(int i=0;i<=n3;i++){
                 sylvesterMatrix.get(j).set((i+j-n3),coeffs3.get(n3-i));
             }
         }
 
+        //Заполнение c
         for(int j=filledRows;(j<(filledRows+n1) && j<sizeMatrix);j++){
             sylvesterMatrix.get(j).set((n3+j-filledRows),modulo(coeffs3.get(0)-c,this.mod));
         }
@@ -313,6 +318,9 @@ public class Backend {
 
         List<List<Integer>> coeffs2 = new ArrayList<>();
 
+
+        //Создание коэффициентов для деления
+        //Например: если MOD = 5; то при i = 1: coeffs_i = {0, 0, 0, 0, 0, 1} или x^5 (здесь обратный порядок)
         for(int i=0;i<n;i++){
             int[] temp = new int[this.mod*i+1];
             ArrayList<Integer> coeffs_i = new ArrayList<>();
@@ -354,6 +362,7 @@ public class Backend {
         logger.writeLog("Transposed matrix QT: \n",false);
         printMatrix(matrixQ);
 
+        //создание единичной матрицы
         List<List<Integer>> matrixE = new ArrayList<>();
         int[] temp1 = new int[n];
         for(int i=0;i<n;i++){
@@ -370,6 +379,8 @@ public class Backend {
         logger.writeLog("Matrix E:\n",false);
         printMatrix(matrixE);
 
+
+        //вычитаем из матрицы QT единичную
         List<List<Integer>> matrixQTMinusE = new ArrayList<>();
         temp1 = new int[n];
         for(int i=0;i<n;i++){
@@ -394,8 +405,10 @@ public class Backend {
         logger.writeLog("Matrix QT-E:\n",false);
         printMatrix(matrixQTMinusE);
 
+        //приведение матрицы к ступенчатому виду
         gaussElimination(matrixQTMinusE);
 
+        //модуль для каждого элемента ступенчатой матрицы
         for(int i=0;i<n;i++){//modulo for every elem
             for(int j=0;j<n;j++){
                 matrixQTMinusE.get(i).set(j,modulo(matrixQTMinusE.get(i).get(j),this.mod));
@@ -405,6 +418,8 @@ public class Backend {
         logger.writeLog("Matrix QT-E in step view:\n",false);
         printMatrix(matrixQTMinusE);
 
+
+        //считаем ранг ступенчатой матрицы
         int rank=0;
         for(int i=0;i<matrixQTMinusE.size();i++){
             boolean allZeros = true;
@@ -421,6 +436,8 @@ public class Backend {
 
         List<List<Integer>> resultMatrix = new ArrayList<>();
 
+
+        //идем по строкам ступенчатой матрицы
         for(int i=0;i<matrixQTMinusE.size();i++){
             boolean allZeros=true;
             for(int m=0;m<matrixQTMinusE.get(i).size();m++){
@@ -429,16 +446,19 @@ public class Backend {
                     break;
                 }
             }
+            //если строка ненулевая, добавляем ее в вывод
             if(!allZeros){
                 resultMatrix.add(matrixQTMinusE.get(i));
             }
         }
 
+        //итоговая матрица
         logger.writeLog("Final matrix:\n",false);
         printMatrix(resultMatrix);
 
         logger.writeLog("Matrix rank: "+rank,true);
 
+        //количество множителей
         int k = n - rank;
         logger.writeLog("Amount of multipliers: "+k,true);
         if(k<=1){
@@ -446,21 +466,27 @@ public class Backend {
             return;
         }
 
+
+        //Создаем вектор для хранения ФСР (фундаментальной системы решений)
         List<List<Integer>> FSRMatrix = solveFundamentalSystem(resultMatrix);
 
+        //Выводим фундаментальную систему решений
         logger.writeLog("Basis of the solution space:\n",true);
         printMatrix(FSRMatrix);
 
+        //Удаляем первую строку
         FSRMatrix.removeFirst();
 
         //Arraylist for polinomial storage
         ArrayList<Polynomial> polys = new ArrayList<>();
 
+        //Преобразование каждой строки матрицы в многочлен и сохранение в виде ArrayList
         for(int i=0;i<FSRMatrix.size();i++){
             Polynomial poly = new Polynomial((ArrayList<Integer>)FSRMatrix.get(i),this.mod);
             polys.add(poly);
         }
 
+        //Итоговые многочлены:
         logger.writeLog("Polynomials: ",true);
         for(int i=0;i<polys.size();i++){
             polys.get(i).printPolynomial();
@@ -470,10 +496,14 @@ public class Backend {
         ArrayList<Integer> coeffs3 = (ArrayList<Integer>) FSRMatrix.get(0);
         Polynomial poly3 = new Polynomial(coeffs3,this.mod);
 
+
+        //ArrayList для хранения результатов
         ArrayList<Integer> resultants = new ArrayList<>();
         for(int i=0;i<this.mod;i++){
             resultants.add(0);
         }
+
+        //Создаем матрицу Сильвестра и находим его определители
         for(int c=0;c<this.mod;c++){
             List<List<Integer>> sylvesterMatrix = buildSylvesterMatrix(coeffs1,coeffs3,c);
             resultants.set(c,modulo(determinant(sylvesterMatrix),this.mod));
@@ -486,6 +516,7 @@ public class Backend {
 
         ArrayList<Integer> root = new ArrayList<>();
 
+        //Записываем корни равные нулевому значению
         for(int c=0;c<this.mod;c++){
             if(resultants.get(c)==0){
                 root.add(c);
@@ -498,11 +529,13 @@ public class Backend {
         }
         logger.writeLog("\n",false);
 
+        //хранение для хранения всех результатов adjustedPolynomial
         List<List<Polynomial>> allAdjustedPolys = new ArrayList<>();
         for(int i=0;i<k;i++){
             allAdjustedPolys.add(new ArrayList<>());
         }
 
+        //перебор значений для -root
         for(int i=0;i<root.size();i++){
             logger.writeLog("Subtracting "+root.get(i)+"\n",true);
             ArrayList<Integer> temp = new ArrayList<>();
@@ -523,12 +556,13 @@ public class Backend {
         }
         logger.writeLog(" ",true);
 
+        //определение размеров матрицы
         int maxDeg = 0;
         for(int i=0;i<resultPoly.size();i++){
             int deg = getLastDeg(resultPoly.get(i).getCoefficients());
             maxDeg = Math.max(maxDeg,deg);
         }
-
+        //создание матрицы коэффициентов
         List<List<Integer>> resultPolyMatrix = new ArrayList<>();
         for(int i=0;i<resultPoly.size();i++){
             ArrayList<Integer> temp = new ArrayList<>();
@@ -538,6 +572,7 @@ public class Backend {
             resultPolyMatrix.add(temp);
         }
 
+        //заполнение матрицы коэффициентов
         for(int i=0;i<resultPoly.size();i++){
             ArrayList<Integer> coeffs = resultPoly.get(i).getCoefficients();
             for(int j=0;j<coeffs.size();j++){
