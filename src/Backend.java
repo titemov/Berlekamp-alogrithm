@@ -210,12 +210,12 @@ public class Backend {
         int n1 = getLastDeg(coeffs1);
         int n3 = getLastDeg(coeffs3);
 
-        int sizeMatrix=n1+n3;//размер матрицы
+        int matrixSize=n1+n3;//размер матрицы
 
         List<List<Integer>> sylvesterMatrix = new ArrayList<>();
-        for(int i=0;i<sizeMatrix;i++){
+        for(int i=0;i<matrixSize;i++){
             ArrayList<Integer> temp = new ArrayList<>();
-            for(int m=0;m<sizeMatrix;m++){
+            for(int m=0;m<matrixSize;m++){
                 temp.add(0);
             }
             sylvesterMatrix.add(temp);
@@ -232,16 +232,21 @@ public class Backend {
         }
 
         //Заполнение коэффициентами многочлена coeffs3
-        for(int j=filledRows;j<sizeMatrix;j++){
+        for(int j=filledRows;j<matrixSize;j++){
             for(int i=0;i<=n3;i++){
                 sylvesterMatrix.get(j).set((i+j-n3),coeffs3.get(n3-i));
             }
         }
 
+        //printMatrix(sylvesterMatrix);
+
         //Заполнение c
-        for(int j=filledRows;(j<(filledRows+n1) && j<sizeMatrix);j++){
+        for(int j=filledRows;(j<(filledRows+n1) && j<matrixSize);j++){
             sylvesterMatrix.get(j).set((n3+j-filledRows),modulo(coeffs3.get(0)-c,this.mod));
         }
+
+        //printMatrix(sylvesterMatrix);
+
         return sylvesterMatrix;
     }
 
@@ -308,13 +313,13 @@ public class Backend {
         logger.writeLog("User mod input: "+this.mod,true);
 
         Polynomial poly1 = new Polynomial(coeffs1, this.mod);
-        logger.writeLog("Your polinomial: ",true);
+        logger.writeLog("Your polynomial: ",true);
         poly1.printPolynomial();
 
         logger.writeLog("With module "+this.mod+"\n",false);
 
         int n=getLastDeg(coeffs1);
-        logger.writeLog("Last polynomial degree: "+n,true);
+        logger.writeLog("Greatest polynomial degree: "+n,true);
 
         List<List<Integer>> coeffs2 = new ArrayList<>();
 
@@ -322,10 +327,9 @@ public class Backend {
         //Создание коэффициентов для деления
         //Например: если MOD = 5; то при i = 1: coeffs_i = {0, 0, 0, 0, 0, 1} или x^5 (здесь обратный порядок)
         for(int i=0;i<n;i++){
-            int[] temp = new int[this.mod*i+1];
             ArrayList<Integer> coeffs_i = new ArrayList<>();
-            for(int m=0;m<temp.length;m++){
-                coeffs_i.add(temp[m]);
+            for(int m=0;m<this.mod*i+1;m++){
+                coeffs_i.add(0);
             }
             coeffs_i.set(coeffs_i.size()-1,1);
             coeffs2.add(coeffs_i);
@@ -364,13 +368,12 @@ public class Backend {
 
         //создание единичной матрицы
         List<List<Integer>> matrixE = new ArrayList<>();
-        int[] temp1 = new int[n];
         for(int i=0;i<n;i++){
-            ArrayList<Integer> temp2 = new ArrayList<>();
+            ArrayList<Integer> tempAL = new ArrayList<>();
             for(int m=0;m<n;m++){
-                temp2.add(temp1[m]);
+                tempAL.add(0);
             }
-            matrixE.add(temp2);
+            matrixE.add(tempAL);
         }
         for(int i=0;i<n;i++){
             matrixE.get(i).set(i,1);
@@ -380,16 +383,16 @@ public class Backend {
         printMatrix(matrixE);
 
 
-        //вычитаем из матрицы QT единичную
+        //создаем матрицу QT минус единичная
         List<List<Integer>> matrixQTMinusE = new ArrayList<>();
-        temp1 = new int[n];
         for(int i=0;i<n;i++){
-            ArrayList<Integer> temp2 = new ArrayList<>();
+            ArrayList<Integer> tempAL = new ArrayList<>();
             for(int m=0;m<n;m++){
-                temp2.add(temp1[m]);
+                tempAL.add(0);
             }
-            matrixQTMinusE.add(temp2);
+            matrixQTMinusE.add(tempAL);
         }
+        //вычитаем из матрицы QT единичную
         for(int i=0;i<n;i++){
             for(int j=0;j<n;j++){
                 matrixQTMinusE.get(i).set(j,(matrixQ.get(i).get(j)-matrixE.get(i).get(j)));
@@ -497,7 +500,7 @@ public class Backend {
         Polynomial poly3 = new Polynomial(coeffs3,this.mod);
 
 
-        //ArrayList для хранения результатов
+        //ArrayList для хранения результантов
         ArrayList<Integer> resultants = new ArrayList<>();
         for(int i=0;i<this.mod;i++){
             resultants.add(0);
