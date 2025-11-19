@@ -9,6 +9,7 @@ Java version 25
 
 - [ ] Better variable names
 - [ ] Clean from unused code
+- [ ] Better OOP
 - [ ] Write on what math this algo is based on
 
 ## References
